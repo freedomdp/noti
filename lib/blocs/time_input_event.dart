@@ -6,3 +6,9 @@ class TimeChanged extends TimeInputEvent {
 
   TimeChanged({required this.hour, required this.minute});
 }
+
+class ShowErrorEvent extends TimeInputEvent {
+  final bool showError;
+
+  ShowErrorEvent(this.showError);
+}

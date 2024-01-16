@@ -8,6 +8,11 @@ class CurrentTimeDisplay extends StatefulWidget {
 
   @override
   CurrentTimeDisplayState createState() => CurrentTimeDisplayState();
+
+  static String getCurrentTime() {
+    final now = DateTime.now();
+    return DateFormat('HH:mm').format(now); // Отображение времени включая секунды
+  }
 }
 
 class CurrentTimeDisplayState extends State<CurrentTimeDisplay> {
@@ -18,7 +23,8 @@ class CurrentTimeDisplayState extends State<CurrentTimeDisplay> {
   void initState() {
     super.initState();
     _timeString = _formatCurrentTime();
-    _timer = Timer.periodic(const Duration(minutes: 1), (Timer t) => _getTime());
+    // Изменение интервала таймера на 1 секунду
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _getTime());
   }
 
   void _getTime() {
@@ -30,7 +36,7 @@ class CurrentTimeDisplayState extends State<CurrentTimeDisplay> {
 
   String _formatCurrentTime() {
     var now = DateTime.now();
-    var formatter = DateFormat('HH:mm');
+    var formatter = DateFormat('HH:mm'); // Форматирование времени с секундами
     return formatter.format(now);
   }
 
@@ -40,10 +46,11 @@ class CurrentTimeDisplayState extends State<CurrentTimeDisplay> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Text(
       _timeString,
-      style: TextStyles.h3, // Применение стиля H3
+      style: TextStyles.h3,
       textAlign: TextAlign.center,
     );
   }

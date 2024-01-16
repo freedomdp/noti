@@ -12,21 +12,23 @@ class TimeInputField extends StatefulWidget {
   const TimeInputField({Key? key, required this.controllers}) : super(key: key);
 
   @override
-  _TimeInputFieldState createState() => _TimeInputFieldState();
+  TimeInputFieldState createState() => TimeInputFieldState();
 }
 
-class _TimeInputFieldState extends State<TimeInputField> {
-  late List<FocusNode> _focusNodes; // Правильное объявление
+class TimeInputFieldState extends State<TimeInputField> {
+  late List<FocusNode> focusNodes;
 
   @override
   void initState() {
     super.initState();
-    _focusNodes = List.generate(4, (_) => FocusNode());
+    focusNodes = List.generate(4, (_) => FocusNode());
   }
 
   @override
   void dispose() {
-    _focusNodes.forEach((node) => node.dispose());
+    for (var node in focusNodes) {
+      node.dispose();
+    }
     super.dispose();
   }
 
@@ -37,12 +39,17 @@ class _TimeInputFieldState extends State<TimeInputField> {
       children: <Widget>[
         _buildSingleInputField(
             0,
-                (value) =>
-            value == null ||
+            (value) =>
+                value == null ||
                 value.isEmpty ||
                 int.tryParse(value) != null && int.parse(value) <= 2),
         _buildSingleInputField(1),
-        const Text(':', style: TextStyles.bodyMedium),
+        Text(
+          ':',
+          style: TextStyles.h3.copyWith(
+            color: AppColors.inactiveColor,
+          ),
+        ),
         _buildSingleInputField(2),
         _buildSingleInputField(3),
       ],
@@ -61,26 +68,31 @@ class _TimeInputFieldState extends State<TimeInputField> {
       ),
       child: TextField(
         controller: widget.controllers[index],
-        focusNode: _focusNodes[index],
+        focusNode: focusNodes[index],
+        onTap: () {
+          if (widget.controllers[index].text.isNotEmpty) {
+            widget.controllers[index].clear();
+          }
+        },
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         style: TextStyles.bodyMedium,
         decoration: const InputDecoration(
           border: InputBorder.none,
           contentPadding: EdgeInsets.all(12.0),
-          counterText: "", // Убираем символы 0 и 1
+          counterText: "",
         ),
         maxLength: 1,
         maxLengthEnforcement: MaxLengthEnforcement.enforced,
-        inputFormatters: [
-          validator != null ? FilteringTextInputFormatter.allow(
-              RegExp(r'[0-2]')) : FilteringTextInputFormatter.digitsOnly
-        ],
+        inputFormatters: _getInputFormatters(index),
         onChanged: (value) {
+          if (index == 0) {
+            setState(
+                () {}); // Обновление состояния для изменения правил ввода второго поля
+          }
           if (value.length == 1 && index < widget.controllers.length - 1) {
             FocusScope.of(context).nextFocus();
           } else if (value.length == 1 &&
-
               index == widget.controllers.length - 1) {
             FocusScope.of(context).unfocus(); // Скрываем клавиатуру
             _checkAllFieldsFilled();
@@ -89,6 +101,30 @@ class _TimeInputFieldState extends State<TimeInputField> {
         },
       ),
     );
+  }
+
+  List<TextInputFormatter> _getInputFormatters(int index) {
+    // Если это второе поле, то устанавливаем форматтер на основе значения первого поля
+    if (index == 1) {
+      final firstFieldValue = widget.controllers[0].text;
+      if (firstFieldValue == '2') {
+        return [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-4]'))
+        ]; // Только 0-4, если первое поле - '2'
+      } else {
+        return [
+          FilteringTextInputFormatter.digitsOnly
+        ]; // Любая цифра, если первое поле - '0' или '1'
+      }
+    } else if (index == 2) {
+      return [
+        FilteringTextInputFormatter.allow(RegExp(r'[0-5]'))
+      ]; // Для третьего поля - только 0-5
+    } else {
+      return [
+        FilteringTextInputFormatter.digitsOnly
+      ]; // Для остальных полей - любые цифры
+    }
   }
 
   void _updateBlocState() {
@@ -100,7 +136,8 @@ class _TimeInputFieldState extends State<TimeInputField> {
   }
 
   void _checkAllFieldsFilled() {
-    bool allFilled = widget.controllers.every((controller) => controller.text.length == 1);
+    bool allFilled =
+        widget.controllers.every((controller) => controller.text.length == 1);
     if (allFilled) {
       _updateBlocState();
     }
