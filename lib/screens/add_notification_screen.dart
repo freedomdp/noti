@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/custom_app_bar.dart';
 
 class AddNotificationScreen extends StatelessWidget {
@@ -9,8 +8,9 @@ class AddNotificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(titleText: 'Add New Notification'),
-      body: const Center(
-        child: Text('Here you can add a new notification.'),
+      body: Center(
+        child: Text('Content for adding a new notification goes here'),
+        // Здесь будет содержимое страницы для добавления нового уведомления
       ),
     );
   }
